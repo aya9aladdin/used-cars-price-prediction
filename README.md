@@ -7,3 +7,7 @@ a machine-learning model that can predict used car prices according to the car b
 
 I used `beatifulSoup` library to scrap the whole used car data on hatla2ee.com.
 
+##TODO
+1. Develop a data pipeline to inject the data into the data lake and data warehouse
+2. develop analytics dashboard and ML model
+3. develop platform for production
