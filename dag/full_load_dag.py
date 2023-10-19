@@ -3,7 +3,7 @@ from datetime import datetime
 
 from airflow.decorators import dag
 
-from dag.helpers import scrap_cars_data, local_to_s3, scrap_cars_body, local_to_s3
+from helpers import scrap_cars_data, local_to_s3, scrap_cars_body, local_to_s3
 from airflow.providers.amazon.aws.operators.redshift_data import RedshiftDataOperator
 from airflow.providers.amazon.aws.transfers.s3_to_redshift import  S3ToRedshiftOperator
 from airflow.decorators import task
@@ -73,6 +73,7 @@ def full_load_pipeline():
         aws_conn_id='aws-connection',
         
     )
-
+    db_init >> cars_s3_to_redshift >> cars_body_s3_to_redshift >> full_load
+    
 full_load_pipeline()
 

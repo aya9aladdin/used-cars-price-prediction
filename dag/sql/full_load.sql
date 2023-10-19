@@ -1,81 +1,102 @@
-
 -- Populate staging cars body/model data table
 
+-- Insert unique combinations of brand, model, and body into the staging temp table
 INSERT INTO cars.staging.temp (brand, model, body)
-select brand, model, body from cars.raw_schema.cars_body_data as o 
-group by 1, 2, 3
-having count(*) = (select count(*) from cars.raw_schema.cars_body_data as i  
-                   group by model, brand, body 
-                   having o.model = i.model
-                  and o.brand = i.brand
-                  order by 1 desc limit 1);
-                  
-                  
-INSERT INTO cars.staging.cars_body_data (model, brand)
-select model, brand from cars.raw_schema.cars_data
-group by 1, 2;
+SELECT brand, model, body
+FROM cars.raw_schema.cars_body_data AS o
+GROUP BY 1, 2, 3
+HAVING COUNT(*) = (
+  SELECT COUNT(*)
+  FROM cars.raw_schema.cars_body_data AS i
+  WHERE o.model = i.model AND o.brand = i.brand
+  ORDER BY 1 DESC
+  LIMIT 1
+);
 
-UPDATE cars.staging.cars_body_data as u
-SET body = (select body from cars.staging.temp t where (u.model, u.brand) = (t.model, t.brand) limit 1);
-            
+-- Insert distinct brand and model combinations into the staging cars_body_data table
+INSERT INTO cars.staging.cars_body_data (model, brand)
+SELECT model, brand
+FROM cars.raw_schema.cars_data
+GROUP BY 1, 2;
+
+-- Update the body information in the staging cars_body_data table
+UPDATE cars.staging.cars_body_data AS u
+SET body = (
+  SELECT body
+  FROM cars.staging.temp t
+  WHERE (u.model, u.brand) = (t.model, t.brand)
+  LIMIT 1
+);
+
 -- Populate staging cars classes data table
 
-INSERT INTO cars.staging.cars_classes_data(model, brand, class)
-SELECT distinct b.model, b.brand, replace(c.class, 'None', 'Basic') from cars.staging.cars_body_data as b, cars.raw_schema.cars_data as c 
+-- Clear the staging cars_classes_data table
+TRUNCATE cars.staging.cars_classes_data;
+
+-- Insert distinct model, brand, and class combinations into the staging cars_classes_data table
+INSERT INTO cars.staging.cars_classes_data (model, brand, class)
+SELECT DISTINCT b.model, b.brand, REPLACE(c.class, 'None', 'Basic')
+FROM cars.staging.cars_body_data AS b, cars.raw_schema.cars_data AS c
 WHERE (c.model, c.brand) = (b.model, b.brand);
-
-
 
 -- Populate staging cars main data table
 
-INSERT INTO cars.staging.cars_data (car_id, class_id, model_year, ad_date, transmission, price,
-    fingerprint, km, color, fuel, city ) 
-    SELECT distinct car_id, cl.class_id ,
-    model_year ,
-    ad_date ,
-    transmission,
-    case REGEXP_REPLACE(price, '([^0-9])','')
-    when '' then '0' else REGEXP_REPLACE(price, '([^0-9])','') end::integer,
-    fingerprint,
-    case REGEXP_REPLACE(km, '([^0-9])','')
-    when '' then '0' else REGEXP_REPLACE(km, '([^0-9])','')end::integer,
-    color,
-    fuel, 
-    city 
-    from cars.raw_schema.cars_data as main, cars.staging.cars_classes_data as cl
-    WHERE (cl.class, cl.model, cl.brand) =(main.class, main.model, main.brand);
+-- Clear the staging cars_data table
+TRUNCATE cars.staging.cars_data;
 
+-- Insert data into the staging cars_data table, cleaning and converting values
+INSERT INTO cars.staging.cars_data (car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
+SELECT DISTINCT car_id, model_year, ad_date, transmission, 
+  CASE REGEXP_REPLACE(price, '([^0-9])', '')
+    WHEN '' THEN '0'
+    ELSE REGEXP_REPLACE(price, '([^0-9])', '')
+  END::integer,
+  fingerprint,
+  CASE REGEXP_REPLACE(km, '([^0-9])', '')
+    WHEN '' THEN '0'
+    ELSE REGEXP_REPLACE(km, '([^0-9])', '')
+  END::integer,
+  color, fuel, city
+FROM cars.raw_schema.cars_data;
 
 -- Populate production cars body/model data table
-TRUNCATE cars.prod.cars_body_data;
-INSERT INTO cars.prod.cars_body_data (brand, model,body)
-SELECT distinct brand, model, body from cars.staging.cars_body_data;
 
+-- Clear the production cars_body_data table
+TRUNCATE cars.prod.cars_body_data;
+
+-- Insert distinct brand, model, and body combinations into the production cars_body_data table
+INSERT INTO cars.prod.cars_body_data (brand, model, body)
+SELECT DISTINCT brand, model, body
+FROM cars.staging.cars_body_data;
 
 -- Populate production cars classes data table
-TRUNCATE cars.prod.cars_classes_data;
-INSERT INTO cars.prod.cars_classes_data(model, brand, class)
-select distinct model, brand, class from cars.staging.cars_classes_data as i where i.class !='';
 
+-- Clear the production cars_classes_data table
+TRUNCATE cars.prod.cars_classes_data;
+
+-- Insert distinct model, brand, and class combinations into the production cars_classes_data table
+INSERT INTO cars.prod.cars_classes_data (model, brand, class)
+SELECT DISTINCT model, brand, class
+FROM cars.staging.cars_classes_data AS i
+WHERE i.class != '';
 
 -- Populate production cars main data table
+
+-- Clear the production cars_data table
 TRUNCATE cars.prod.cars_data;
-INSERT INTO cars.prod.cars_data (car_id, class_id, model_year, ad_date, transmission, price,
-    fingerprint, km, color, fuel, city) 
-    SELECT distinct car_id, class_id,
-    model_year ,
-    ad_date ,
-    transmission,
-    price,
-    fingerprint,
-    km,
-    color,
-    fuel, 
-    city 
-    from cars.staging.cars_data;
 
+-- Insert data into the production cars_data table
+INSERT INTO cars.prod.cars_data (car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
+SELECT DISTINCT car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city
+FROM cars.staging.cars_data;
 
-UPDATE cars.prod.cars_data as u
-SET class_id = (select o.class_id from cars.prod.cars_classes_data as o join cars.staging.cars_classes_data as i 
-on i.model = o.model and i.brand = o.brand and i.class = o.class
-where i.class_id = u.class_id limit 1);
+-- Update class_id in the production cars_data table based on staging data
+UPDATE cars.prod.cars_data AS u
+SET class_id = (
+  SELECT o.class_id
+  FROM cars.prod.cars_classes_data AS o
+  JOIN cars.raw_schema.cars_data AS r
+  ON r.model = o.model AND r.brand = o.brand AND r.class = o.class
+  WHERE r.car_id = u.car_id
+  LIMIT 1
+);

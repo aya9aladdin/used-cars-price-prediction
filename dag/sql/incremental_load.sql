@@ -47,25 +47,24 @@ FROM cars.staging.cars_classes_data;
 TRUNCATE cars.staging.cars_data;
 
 -- Insert data into the staging cars_data table, mapping class_id to class data
-INSERT INTO cars.staging.cars_data (car_id, class_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
-SELECT main.car_id, cl.class_id,
-       main.model_year,
-       main.ad_date,
-       main.transmission,
-       CASE REGEXP_REPLACE(main.price, '([^0-9])', '')
+INSERT INTO cars.staging.cars_data (car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
+SELECT car_id,
+       model_year,
+       ad_date,
+       transmission,
+       CASE REGEXP_REPLACE(price, '([^0-9])', '')
          WHEN '' THEN '0'
-         ELSE REGEXP_REPLACE(main.price, '([^0-9])', '')
+         ELSE REGEXP_REPLACE(price, '([^0-9])', '')
        END::integer,
-       main.fingerprint,
-       CASE REGEXP_REPLACE(main.km, '([^0-9])', '')
+       fingerprint,
+       CASE REGEXP_REPLACE(km, '([^0-9])', '')
          WHEN '' THEN '0'
-         ELSE REGEXP_REPLACE(main.km, '([^0-9])', '')
+         ELSE REGEXP_REPLACE(km, '([^0-9])', '')
        END::integer,
-       main.color,
-       main.fuel,
-       main.city
-FROM cars.raw_schema.cars_data AS main, cars.staging.cars_classes_data AS cl
-WHERE (cl.class, cl.model, cl.brand) = (main.class, main.model, main.brand);
+       color,
+       fuel,
+       city
+FROM cars.raw_schema.cars_data;
 
 -- Populate production cars body/model data table
 -- Insert unique combinations of brand, model, and body into the production table
@@ -98,16 +97,11 @@ WHERE prod.car_id = stg.car_id AND prod.fingerprint != stg.fingerprint;
 
 -- Add new cars data
 -- Insert distinct car data from staging into production
-INSERT INTO cars.prod.cars_data (car_id, class_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
-SELECT DISTINCT car_id, class_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city
+INSERT INTO cars.prod.cars_data (car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
+SELECT DISTINCT car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city
 FROM cars.staging.cars_data
 EXCEPT
-SELECT DISTINCT car_id, class_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city
-FROM cars.prod.cars_data;
-
--- Ensure there are no duplicate rows in the production cars_data table
-INSERT INTO cars.prod.cars_data
-SELECT DISTINCT *
+SELECT DISTINCT car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city
 FROM cars.prod.cars_data;
 
 -- Update class_id in the production cars_data table based on staging data
@@ -115,7 +109,8 @@ UPDATE cars.prod.cars_data AS u
 SET class_id = (
   SELECT o.class_id
   FROM cars.prod.cars_classes_data AS o
-  JOIN cars.staging.cars_classes_data AS i ON i.model = o.model AND i.brand = o.brand AND i.class = o.class
-  WHERE i.class_id = u.class_id
+  JOIN cars.raw_schema.cars_data AS r
+  ON r.model = o.model AND r.brand = o.brand AND r.class = o.class
+  WHERE r.car_id = u.car_id
   LIMIT 1
 );
