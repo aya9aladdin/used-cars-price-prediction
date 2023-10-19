@@ -30,7 +30,7 @@ WHERE (c.model, c.brand) = (b.model, b.brand);
 
 INSERT INTO cars.staging.cars_data (car_id, class_id, model_year, ad_date, transmission, price,
     fingerprint, km, color, fuel, city ) 
-    SELECT car_id, cl.class_id ,
+    SELECT distinct car_id, cl.class_id ,
     model_year ,
     ad_date ,
     transmission,
@@ -55,7 +55,7 @@ SELECT distinct brand, model, body from cars.staging.cars_body_data;
 -- Populate production cars classes data table
 TRUNCATE cars.prod.cars_classes_data;
 INSERT INTO cars.prod.cars_classes_data(model, brand, class)
-select distinct model, brand, class from cars.staging.cars_classes_data;
+select distinct model, brand, class from cars.staging.cars_classes_data as i where i.class !='';
 
 
 -- Populate production cars main data table
