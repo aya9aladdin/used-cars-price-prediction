@@ -11,12 +11,6 @@ import dash
 API_URL = 'http://127.0.0.1:5000/predict_car_price'
 
 
-data = (
-    pd.read_csv("avocado.csv")
-    .assign(Date=lambda data: pd.to_datetime(data["Date"], format="%Y-%m-%d"))
-    .sort_values(by="Date")
-)
-
 features = pd.read_pickle('../models/ohe_features.pkl')
 
 fuel_data = pd.read_pickle("../models/ohe_fuel.pkl")
