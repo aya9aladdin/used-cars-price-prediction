@@ -42,3 +42,43 @@ The technologies I used in developing the pipeline are:
 
 
 ## Data Analytics
+All the analytics are found in detail in the notebook directory. I'll show the main charts here
+
+### Brand popularity in the market
+![image](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/007008c2-6da9-4989-b2e6-75eeb2c0bc87)
+
+### Model popularity in the market 
+![image](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/2b44697e-a21c-4d1b-9f74-6f4f68dd3f93)
+
+### Most popular colors
+
+![colors](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/42929434-5a52-458b-83d9-ceb2ba16e7d4)
+
+### Average age of the car per brand
+![image](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/2d5e70e2-db27-4bad-9758-43fab74a3662)
+
+### Average Km of the car per Model (top 50)
+![model km](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/23996c25-9479-4798-b01d-ff05da6172e6)
+
+### Average Km per brand
+![avg_km](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/a0ce8de5-d337-4b6b-9608-03625c828fea)
+
+### Fuel, transmission, and body distributions 
+![colle](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/5b182b83-18ea-4df8-a8d1-8b8cca43e4ae)
+
+### Cars distribution per governorate
+![gov](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/945e0e8b-9a4b-4281-af8b-639bfde7e01b)
+
+
+### brands distribution per governorate
+![govs](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/a6063296-7d22-4019-874c-3914c9dc5148)
+
+
+
+## Prediction model
+
+I have built a neural network of three dense layers and trained the data on it. The accuracy of the model was around 92%. More details about building the model and data preparation are in the notebook directory. After training the model, I saved it as a pickle file along with
+car data frame and trained scaler, to be used later by the prediction API and the web application
+
+## Web application
+
