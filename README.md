@@ -9,7 +9,7 @@ Plotly Dash provides an interactive user interface for predicting car prices
 
 I used the [beatifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) library to scrap the whole used car data on hatla2ee.com. Firstly, I scraped the car's data based on the fuel type as a search filter to avoid the need to load every single car page to get
 the fuel data (this was the only information that was not available on the car's list page and needed to load each car page to get). Then, I scraped data based on the car body search filter, because when I used
-both fule and body data as filters at the same time, I found that only 10% of the data are being scraped, which turned out to be caused by the fact that not all cars have the body type information available so they don't appear in the search filter.
+both fule and body data as filters at the same time, I found that only 10% of the data were being scraped, which turned out to be caused by the fact that not all cars have the body type information available so they don't appear in the search filter.
 I scraped the available cars with body type information and used it to develop a data set with the available body data for each model, which can be used to get the body type of cars of the same model with no body data.
 
 
@@ -17,7 +17,7 @@ I scraped the available cars with body type information and used it to develop a
 ## Technologies
 The technologies I used in developing the pipeline are:
 
-    Scrapin: 
+    Scrapin: beatifulSoup
     Cloud: AWS
     Data Lake: S3
     Data Warehouse: Amazon Redshift
