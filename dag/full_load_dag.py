@@ -20,16 +20,17 @@ from airflow.decorators import task
     catchup=False,
 )
 def full_load_pipeline():
+    AWS_CONN_ID='aws-connection'
+    S3_BUCKET_NAME = 'used-cars-egypt-data'
 
-    s3_bucket_name = 'used-cars-egypt-data'
 
     scrap_data = scrap_cars_data.override(task_id='scrap_cars_data')()
 
-    local_data_to_s3 = local_to_s3.override(task_id='cars_data_to_s3')(s3_bucket_name, scrap_data)
+    local_data_to_s3 = local_to_s3.override(task_id='cars_data_to_s3')(S3_BUCKET_NAME, scrap_data)
 
     scrap_body_data = scrap_cars_body.override(task_id='scrap_cars_body_data')()
     
-    local_body_data_to_s3 = local_to_s3.override(task_id='cars_body_data_to_s3')(s3_bucket_name, scrap_body_data)
+    local_body_data_to_s3 = local_to_s3.override(task_id='cars_body_data_to_s3')(S3_BUCKET_NAME, scrap_body_data)
 
     db_init = RedshiftDataOperator(
         task_id='create_redshift_table_schemas',
@@ -37,18 +38,18 @@ def full_load_pipeline():
         sql='sql/init_db_schema.sql',
         cluster_identifier='cars-data',
         db_user='aya',
-        aws_conn_id='aws-connection',
+        aws_conn_id=AWS_CONN_ID,
     )
 
 
     cars_s3_to_redshift = S3ToRedshiftOperator(
             task_id="transfer_s3_to_redshift",
             redshift_conn_id='redshift-cluster',
-            s3_bucket=s3_bucket_name,
+            s3_bucket=S3_BUCKET_NAME,
             s3_key=local_data_to_s3,
             schema="raw_schema",
             table='cars_data',
-            aws_conn_id = 'aws-connection',
+            aws_conn_id = AWS_CONN_ID,
             copy_options=['csv',"IGNOREHEADER 1"],
 
         )
@@ -56,11 +57,11 @@ def full_load_pipeline():
     cars_body_s3_to_redshift = S3ToRedshiftOperator(
             task_id="transfer_body_s3_to_redshift",
             redshift_conn_id='redshift-cluster',
-            s3_bucket=s3_bucket_name,
+            s3_bucket=S3_BUCKET_NAME,
             s3_key=local_body_data_to_s3,
             schema="raw_schema",
             table='cars_body_data',
-            aws_conn_id = 'aws-connection',
+            aws_conn_id = AWS_CONN_ID,
             copy_options=['csv',"IGNOREHEADER 1"],
         )
     
@@ -70,7 +71,7 @@ def full_load_pipeline():
         sql='sql/full_load.sql',
         cluster_identifier='cars-cluster',
         db_user='aya',
-        aws_conn_id='aws-connection',
+        aws_conn_id=AWS_CONN_ID,
         
     )
     db_init >> cars_s3_to_redshift >> cars_body_s3_to_redshift >> full_load

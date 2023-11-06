@@ -18,16 +18,16 @@ from airflow.providers.amazon.aws.transfers.s3_to_redshift import  S3ToRedshiftO
     catchup=False,
 )
 def incremental_cars_data_pipeline():
-
-    s3_bucket_name = 'used-cars-egypt-data'
+    AWS_CONN_ID='aws-connection'
+    S3_BUCKET_NAME = 'used-cars-egypt-data'
 
     scrap_data = scrap_cars_data.override(task_id='daily_scrap_cars_data')()
 
-    local_data_to_s3 = local_to_s3.override(task_id='daily_cars_data_to_s3')(s3_bucket_name, scrap_data)
+    local_data_to_s3 = local_to_s3.override(task_id='daily_cars_data_to_s3')(S3_BUCKET_NAME, scrap_data)
 
     scrap_body_data = scrap_cars_body.override(task_id='daily_scrap_cars_body_data')()
     
-    local_body_data_to_s3 = local_to_s3.override(task_id='daily_cars_body_data_to_s3')(s3_bucket_name, scrap_body_data)
+    local_body_data_to_s3 = local_to_s3.override(task_id='daily_cars_body_data_to_s3')(S3_BUCKET_NAME, scrap_body_data)
 
 
 
@@ -37,29 +37,29 @@ def incremental_cars_data_pipeline():
         sql='sql/truncate.sql',
         cluster_identifier='cars-cluster',
         db_user='aya',
-        aws_conn_id='aws-connection',
+        aws_conn_id=AWS_CONN_ID,
         
     )
 
     cars_s3_to_redshift = S3ToRedshiftOperator(
             task_id="daily_transfer_s3_to_redshift",
             redshift_conn_id='cars-redshift',
-            s3_bucket=s3_bucket_name,
+            s3_bucket=S3_BUCKET_NAME,
             s3_key=local_data_to_s3,
             schema="raw_schema",
             table='cars_data',
-            aws_conn_id = 'aws-connection',
+            aws_conn_id = AWS_CONN_ID,
             copy_options=['csv',"IGNOREHEADER 1"],
         )
 
     cars_body_s3_to_redshift = S3ToRedshiftOperator(
             task_id="daily_trasnfer_body_s3_to_redshift",
             redshift_conn_id='cars-redshift',
-            s3_bucket=s3_bucket_name,
+            s3_bucket=S3_BUCKET_NAME,
             s3_key=local_body_data_to_s3,
             schema="raw_schema",
             table='cars_body_data',
-            aws_conn_id = 'aws-connection',
+            aws_conn_id = AWS_CONN_ID,
             copy_options=['csv',"IGNOREHEADER 1"],
         )
     
@@ -69,7 +69,7 @@ def incremental_cars_data_pipeline():
         sql='sql/incremental_load.sql',
         cluster_identifier='cars-cluster',
         db_user='aya',
-        aws_conn_id='aws-connection',
+        aws_conn_id=AWS_CONN_ID,
         
     )
     truncate_tables >> cars_s3_to_redshift >> cars_body_s3_to_redshift >> incremental_load
