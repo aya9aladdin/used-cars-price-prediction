@@ -81,4 +81,10 @@ I have built a neural network of three dense layers and trained the data on it. 
 car data frame and trained scaler, to be used later by the prediction API and the web application
 
 ## Web application
+This is the interface of the web application. The user selects the car properties and then clicks Predict to see the results, the application also shows statistics of car prices per popular brand and model.
+here is a video demo showing the web app and how to use it: https://youtu.be/xCKlSArHJvQ
+
+<img width="1440" alt="image" src="https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/51072c94-0224-47f9-98b7-6ee809655c16">
+
+<img width="1440" alt="image" src="https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/7cd411c5-e124-429e-a296-debfb284ddce">
 
