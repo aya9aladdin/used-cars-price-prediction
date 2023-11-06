@@ -2,12 +2,16 @@
 
 -- Insert unique combinations of brand, model, and body into the staging temp table
 INSERT INTO cars.staging.temp (brand, model, body)
+with grouped_body_data as (SELECT brand, model, body, COUNT(*) as total
+  FROM cars.raw_schema.cars_body_data 
+  group by brand, model, body
+        )
 SELECT brand, model, body
 FROM cars.raw_schema.cars_body_data AS o
 GROUP BY 1, 2, 3
 HAVING COUNT(*) = (
-  SELECT COUNT(*)
-  FROM cars.raw_schema.cars_body_data AS i
+  SELECT total
+  FROM grouped_body_data AS i
   WHERE o.model = i.model AND o.brand = i.brand
   ORDER BY 1 DESC
   LIMIT 1
@@ -30,19 +34,15 @@ SET body = (
 
 -- Populate staging cars classes data table
 
--- Clear the staging cars_classes_data table
-TRUNCATE cars.staging.cars_classes_data;
 
 -- Insert distinct model, brand, and class combinations into the staging cars_classes_data table
 INSERT INTO cars.staging.cars_classes_data (model, brand, class)
-SELECT DISTINCT b.model, b.brand, REPLACE(c.class, 'None', 'Basic')
+SELECT DISTINCT b.model, b.brand, c.class
 FROM cars.staging.cars_body_data AS b, cars.raw_schema.cars_data AS c
 WHERE (c.model, c.brand) = (b.model, b.brand);
 
 -- Populate staging cars main data table
 
--- Clear the staging cars_data table
-TRUNCATE cars.staging.cars_data;
 
 -- Insert data into the staging cars_data table, cleaning and converting values
 INSERT INTO cars.staging.cars_data (car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
@@ -61,8 +61,6 @@ FROM cars.raw_schema.cars_data;
 
 -- Populate production cars body/model data table
 
--- Clear the production cars_body_data table
-TRUNCATE cars.prod.cars_body_data;
 
 -- Insert distinct brand, model, and body combinations into the production cars_body_data table
 INSERT INTO cars.prod.cars_body_data (brand, model, body)
@@ -71,19 +69,14 @@ FROM cars.staging.cars_body_data;
 
 -- Populate production cars classes data table
 
--- Clear the production cars_classes_data table
-TRUNCATE cars.prod.cars_classes_data;
 
 -- Insert distinct model, brand, and class combinations into the production cars_classes_data table
 INSERT INTO cars.prod.cars_classes_data (model, brand, class)
 SELECT DISTINCT model, brand, class
-FROM cars.staging.cars_classes_data AS i
-WHERE i.class != '';
+FROM cars.staging.cars_classes_data;
 
 -- Populate production cars main data table
 
--- Clear the production cars_data table
-TRUNCATE cars.prod.cars_data;
 
 -- Insert data into the production cars_data table
 INSERT INTO cars.prod.cars_data (car_id, model_year, ad_date, transmission, price, fingerprint, km, color, fuel, city)
@@ -91,12 +84,13 @@ SELECT DISTINCT car_id, model_year, ad_date, transmission, price, fingerprint, k
 FROM cars.staging.cars_data;
 
 -- Update class_id in the production cars_data table based on staging data
+
 UPDATE cars.prod.cars_data AS u
 SET class_id = (
   SELECT o.class_id
   FROM cars.prod.cars_classes_data AS o
   JOIN cars.raw_schema.cars_data AS r
-  ON r.model = o.model AND r.brand = o.brand AND r.class = o.class
+  ON (r.model = o.model AND r.brand = o.brand AND (r.class = o.class))
   WHERE r.car_id = u.car_id
   LIMIT 1
 );
