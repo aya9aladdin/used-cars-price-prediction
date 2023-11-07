@@ -17,7 +17,7 @@ I scraped the available cars with body type information and used it to develop a
 ## Technologies
 The technologies I used in developing the pipeline are:
 
-    Scrapin: beatifulSoup
+    Scrapin: BeatifulSoup
     Cloud: AWS
     Data Lake: S3
     Data Warehouse: Amazon Redshift
@@ -55,13 +55,14 @@ All the analytics are found in detail in the notebook directory. I'll show the m
 ![colors](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/42929434-5a52-458b-83d9-ceb2ba16e7d4)
 
 ### Average age of the car per brand
-![image](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/2d5e70e2-db27-4bad-9758-43fab74a3662)
+![image](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/3ede8dd6-ad9e-404a-af31-ec1c510fc5de)
+
+### Average Km per brand
+![image](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/d0811ecc-063f-4b7c-946a-c595085509b5)
 
 ### Average Km of the car per Model (top 50)
 ![model km](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/23996c25-9479-4798-b01d-ff05da6172e6)
 
-### Average Km per brand
-![avg_km](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/a0ce8de5-d337-4b6b-9608-03625c828fea)
 
 ### Fuel, transmission, and body distributions 
 ![colle](https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/5b182b83-18ea-4df8-a8d1-8b8cca43e4ae)
