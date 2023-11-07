@@ -1,6 +1,6 @@
 # Used Cars Price Prediction
 
-Car prices in Egypt have been in a chaotic situation in the past couple of years, especially in the used car market. In this project, I developed a pipeline to scrap car data (nearly 3OK cars) listed on Hatla2ee.com (one of the biggest Egyptian used cars marketplaces) for sale then stored it [Amazone S3](https://aws.amazon.com/pm/serv-s3/?trk=3cda67b9-5fb7-4d3f-84e8-40b544661f21&sc_channel=ps&ef_id=EAIaIQobChMIvq6ItaiwggMVmZKDBx0lRQkQEAAYASAAEgIbbfD_BwE:G:s&s_kwcid=AL!4422!3!645208988791!e!!g!!amazon%20s3%20block%20storage!19580264380!143903638463) storage as a data lake and loaded it in [Amazon Redshift](https://aws.amazon.com/redshift/) data warehouse using [airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html) to run the pipeline daily. Next, I applied some analytics to the data to prepare it for
+Car prices in Egypt have been in a chaotic situation in the past couple of years, especially in the used car market. In this project, I developed a pipeline to scrap car data (nearly 3OK cars) listed on [Hatla2ee.com](https://eg.hatla2ee.com/) (one of the biggest Egyptian used cars marketplaces) for sale then stored it [Amazone S3](https://aws.amazon.com/pm/serv-s3/?trk=3cda67b9-5fb7-4d3f-84e8-40b544661f21&sc_channel=ps&ef_id=EAIaIQobChMIvq6ItaiwggMVmZKDBx0lRQkQEAAYASAAEgIbbfD_BwE:G:s&s_kwcid=AL!4422!3!645208988791!e!!g!!amazon%20s3%20block%20storage!19580264380!143903638463) storage as a data lake and loaded it in [Amazon Redshift](https://aws.amazon.com/redshift/) data warehouse using [airflow](https://airflow.apache.org/docs/apache-airflow/stable/index.html) to run the pipeline daily. Next, I applied some analytics to the data to prepare it for
 feeding to a neural network model to predict car prices based on its main
 features (brand, model, class, km, transmission, and fuel type), and then I created a RESTful API to deploy the model using Apache Flask. Lastly, I developed a web application using
 Plotly Dash provides an interactive user interface for predicting car prices
@@ -88,4 +88,5 @@ here is a video demo showing the web app and how to use it: https://youtu.be/xCK
 <img width="1440" alt="image" src="https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/51072c94-0224-47f9-98b7-6ee809655c16">
 
 <img width="1440" alt="image" src="https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/7cd411c5-e124-429e-a296-debfb284ddce">
+
 
