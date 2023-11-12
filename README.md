@@ -27,7 +27,9 @@ The technologies I used in developing the pipeline are:
 
 
 
-## Project Flow
+## Data Flow
+Airflow manages two main pipelines `full_load`and `ìncremental_load` pipelines. The `full_oad` one runs once to initiate the database by scraping the bulk corpus from the car website. On the other hand, the `ìncremental_load` pipeline runs daily to scrap new cars data and update 
+existing cars if the price has been changed by the user using the`fingerprint` column to track any changes in prices.
 
 <img width="804" alt="image" src="https://github.com/aya9aladdin/used-cars-price-prediction/assets/27581535/d484b6db-4141-41da-95a0-157ba826e427">
 
