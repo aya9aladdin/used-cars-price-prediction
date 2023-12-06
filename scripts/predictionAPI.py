@@ -18,26 +18,6 @@ import pandas as pd
 # Initiate API and JobPrediction object
 app = Flask(__name__)
 
-"""""
-car_model = PricePredictor(model_path=MODEL_PATH,
-                           scaler_path=SCALER_PATH,
-                           ohe_features_path=OHE_FEATURES_PATH,
-                           ohe_fuel_path=OHE_FUEL_PATH,
-                           )
-
-
-# Create prediction endpoint 
-@app.route('/predict_car_price', methods=['POST'])
-def predict_jobs_probs():
-    car_properties = request.get_json()
-    predictions = car_model.predict_price(car_properties).to_dict()
-    return jsonify(predictions)
-
-
-"""
-
-
-
 api = Api(app)
 
 class CarPricePrediction(Resource):
